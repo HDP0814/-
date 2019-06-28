@@ -23,6 +23,7 @@ public class MyThreadPool {
 	    @Override
 	    public void run() {
 	        Runnable task = null;
+	        System.out.println(isInterrupted());
 	        while(on&&!isInterrupted()){
 			    synchronized (lock){
 	                    while (on && !isInterrupted() && waitQueue.isEmpty()) {

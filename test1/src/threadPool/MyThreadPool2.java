@@ -2,7 +2,14 @@ package threadPool;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * 固定线程数量的线程池，线程数的最大值没有意义
+ * 不能根据任务的数量建立核心线程数而且任务队列
+ * 也没有大小限制，无限放入可能导致内存溢出
+ * 
+ * @author huangdongping
+ *
+ */
 public class MyThreadPool2 {
 	//线程能开启的最大个数
 //	private final int THREADNUMBERMAX = 10000;
