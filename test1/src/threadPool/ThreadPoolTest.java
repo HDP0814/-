@@ -10,7 +10,7 @@ public class ThreadPoolTest {
 	public static void main(String[] args) throws InterruptedException {
 		// TODO Auto-generated method stub
 //		MyThreadPool t = new MyThreadPool(10);
-		MyThreadPool3 t2 = new MyThreadPool3(10,100);
+		MyThreadPool3 t2 = new MyThreadPool3(10,20);
 		Date time1 = new Date();
 //		CountDownLatch countDownLatch = new CountDownLatch(5);
 		for (int i = 0; i < 100; i++) {
@@ -26,6 +26,7 @@ public class ThreadPoolTest {
 		System.out.println("完成的任务数:"+t2.getCompletedTaskCount());
 		Date time2 = new Date();
 		System.out.println("总耗时:"+(time2.getTime()-time1.getTime())+"ms");
+		t2.execute(new Task());
 	}
 }
 

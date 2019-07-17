@@ -30,16 +30,18 @@ public class MyThreadPool3 {
 	private volatile int runState;
 	static final int RUNNING    = 0;
 	static final int SHUTDOWN   = 1;
-	static final int STOP       = 2;
-	static final int TERMINATED = 3;
+//	static final int STOP       = 2;
+//	static final int TERMINATED = 3;
 	//线程池的主要状态锁，对线程池状态（比如线程池大小、runState等）的改变都要使用这个锁
 	private final ReentrantLock mainLock = new ReentrantLock();   
 	//线程池最大线程数量
-	private volatile int maxMumPoolSize = 10000;
+	private volatile int maxMumPoolSize = 1000;
 	//记录当前线程数量
 	private volatile int poolSize = 0;
 	//核心线程数量
 	private volatile int corePoolSize = 10;
+	//指定当任务队列没有任务时，等待多长时间
+	private int appointTime = 2;
 	//阻塞时的任务队列
 	private LinkedBlockingQueue<Runnable> queue;
 	//任务队列大小
@@ -94,7 +96,7 @@ public class MyThreadPool3 {
 	public void setLargestPoolSize(int largestPoolSize) {
 		this.largestPoolSize = largestPoolSize;
 	}
-
+	
 	private class worker extends Thread{
 		boolean on = true;
 		Runnable task = null;
@@ -102,7 +104,6 @@ public class MyThreadPool3 {
 		public worker(Runnable task){
 			this.task = task;
 		}
-		public worker(){}
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
@@ -134,10 +135,44 @@ public class MyThreadPool3 {
 		}
 		
 	}
-	
+	/**
+	 * 
+	 * @param corePoolSize 设置核心线程数的大小
+	 * @param queueSize 设置任务队列的大小
+	 */
 	public MyThreadPool3(int corePoolSize,int queueSize){
 		this.corePoolSize = corePoolSize;
 		this.queueSize = queueSize;
+		queue =  new LinkedBlockingQueue<Runnable>();
+		workerSet = new HashSet<worker>();
+		runState = RUNNING;
+	}
+	/**
+	 * 
+	 * @param appointTime 从任务队列中取任务的最大等待时间
+	 * @param corePoolSize 核心线程数量大小
+	 * @param queueSize 任务队列大小
+	 */
+	public MyThreadPool3(int corePoolSize,int queueSize,int appointTime){
+		this.corePoolSize = corePoolSize;
+		this.queueSize = queueSize;
+		this.appointTime = appointTime;
+		queue =  new LinkedBlockingQueue<Runnable>();
+		workerSet = new HashSet<worker>();
+		runState = RUNNING;
+	}
+	/**
+	 * 
+	 * @param maxMumPoolSize 存在的最大线程数
+	 * @param corePoolSize 核心线程数量大小
+	 * @param queueSize 任务队列大小
+	 * @param appointTime 从任务队列中取任务的最大等待时间
+	 */
+	public MyThreadPool3(int maxMumPoolSize,int corePoolSize,int queueSize,int appointTime){
+		this.corePoolSize = corePoolSize;
+		this.queueSize = queueSize;
+		this.appointTime = appointTime;
+		this.maxMumPoolSize = maxMumPoolSize;
 		queue =  new LinkedBlockingQueue<Runnable>();
 		workerSet = new HashSet<worker>();
 		runState = RUNNING;
@@ -165,11 +200,13 @@ public class MyThreadPool3 {
 		final ReentrantLock mainLock = this.mainLock;
 		mainLock.lock();
 		 try {
-			 if(poolSize < maxMumPoolSize){
+			 if(poolSize < maxMumPoolSize && runState == RUNNING){
 					worker workers = new worker(task);
 					workerSet.add(workers);
 					poolSize++;
-					largestPoolSize++;
+					if(largestPoolSize < poolSize){
+						largestPoolSize = poolSize;
+					}
 					workers.start();
 					result =  true;
 				}
@@ -189,16 +226,4 @@ public class MyThreadPool3 {
 		}
 	}
 
-	//守护线程
-//	public void daemonThread(){
-//		new Thread("daemon"){
-//			public void run(){
-//				while(true){
-//					if(!queue.isEmpty()){
-//						queue.notifyAll();
-//					}
-//				}
-//			}
-//		}.start();
-//	}
 }
